@@ -34,6 +34,10 @@ Supported Markdown: headings, **bold**, *italic*, links, images, lists, blockquo
 
 Images: put them in an `images/` folder and reference them as `![Alt text](../images/photo.jpg)`.
 
+## Pages
+
+Standalone pages live in `content/pages/` and are built to the site root (`content/pages/about.md` → `about.html`). They use the same front matter, but only `title` is required. Edit `about.md` to change the About page, including the donation addresses.
+
 ## Building
 
 ```sh

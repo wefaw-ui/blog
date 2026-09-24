@@ -215,6 +215,16 @@ main {
   border-radius: 3px;
 }
 
+/* "- **Label** `value`" list items: label on top, value below (e.g. donation addresses) */
+.post li > strong:first-child + code {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
 .post pre {
   margin: 2rem 0;
   padding: 1.25rem 1.5rem;

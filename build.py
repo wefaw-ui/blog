@@ -4,6 +4,8 @@
     python3 build.py                 build the site
     python3 build.py new "Title"     start a new post in content/
 
+Standalone pages (content/pages/<slug>.md -> <slug>.html) only need a title.
+
 Post format (content/<slug>.md): front matter, then Markdown.
 
     ---
@@ -36,6 +38,7 @@ LISTMONK_LIST_UUID = "00000000-0000-0000-0000-000000000000"  # public list UUID
 
 ROOT = Path(__file__).parent
 CONTENT = ROOT / "content"
+PAGES = CONTENT / "pages"
 POSTS_OUT = ROOT / "posts"
 
 
@@ -43,7 +46,7 @@ MD_EXTENSIONS = ["extra", "smarty", "sane_lists"]
 FRONT_MATTER = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.S)
 
 
-def parse(path):
+def parse(path, required=("title", "date")):
     text = path.read_text(encoding="utf-8")
     match = FRONT_MATTER.match(text)
     if not match:
@@ -53,11 +56,11 @@ def parse(path):
         if ":" in line:
             key, value = line.split(":", 1)
             meta[key.strip().lower()] = value.strip().strip("\"'")
-    for field in ("title", "date"):
+    for field in required:
         if not meta.get(field):
             sys.exit(f"{path}: front matter is missing '{field}'")
     try:
-        post_date = date.fromisoformat(meta["date"])
+        post_date = date.fromisoformat(meta["date"]) if meta.get("date") else None
     except ValueError:
         sys.exit(f"{path}: date '{meta['date']}' must be YYYY-MM-DD")
     return {
@@ -106,8 +109,8 @@ def page(title, content, base, description=TAGLINE):
 <header class="site-header">
 <a class="wordmark" href="{base}index.html">{SITE_NAME}</a>
 <nav class="site-nav">
+<a href="{base}about.html">About</a>
 <a href="{X_URL}" rel="me noopener" target="_blank">X</a>
-<a href="#newsletter">Newsletter</a>
 </nav>
 </header>
 <main>
@@ -153,6 +156,16 @@ def build():
         (POSTS_OUT / f"{post['slug']}.html").write_text(
             page(post["title"], content, "../", post["description"]), encoding="utf-8")
 
+    pages = [p for p in map(lambda f: parse(f, ("title",)), PAGES.glob("*.md"))
+             if not p["draft"]]
+    for pg in pages:
+        content = f"""<article class="post page">
+<h1>{html.escape(pg['title'])}</h1>
+{pg['body']}
+</article>"""
+        (ROOT / f"{pg['slug']}.html").write_text(
+            page(pg["title"], content, "", pg["description"]), encoding="utf-8")
+
     items = "\n".join(
         f'<li><a href="posts/{p["slug"]}.html"><span class="title">{html.escape(p["title"])}</span>'
         f'<time datetime="{p["date"].isoformat()}">{fmt_date(p["date"])}</time></a></li>'
@@ -162,7 +175,7 @@ def build():
 {items}
 </ul>"""
     (ROOT / "index.html").write_text(page(SITE_NAME, content, ""), encoding="utf-8")
-    print(f"Built {len(posts)} posts.")
+    print(f"Built {len(posts)} posts, {len(pages)} pages.")
 
 
 if __name__ == "__main__":
