@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets / local config
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.directory
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+\#*\#
+
+# Build output (index.html, posts/) is committed so the site can be served
+# as-is (e.g. GitHub Pages). If your host runs `python3 build.py` itself
+# (Netlify, Cloudflare Pages), uncomment these to keep generated files out of git:
+# /index.html
+# /posts/
